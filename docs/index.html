@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Learning Query-Aware Budget-Tier Routing for Runtime Agent Memory">
+  <meta name="keywords" content="Large Language Models, Agent Memory, LLM Agents, LLM Routers, Performance-cost Trade-off">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning Query-Aware Budget-Tier Routing for Runtime Agent Memory</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://github.com/ViktorAxelsen/BudgetMem">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://github.com/ViktorAxelsen/BudgetMem">
+            BudgetMem
+          </a>
+          <a class="navbar-item" href="https://github.com/ViktorAxelsen/MemSkill">
+            MemSkill
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Learning Query-Aware Budget-Tier Routing for Runtime Agent Memory</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a>Haozhen Zhang</a><sup>*, 1</sup>,</span>
+            <span class="author-block">
+              <a>Haodong Yue</a><sup>*, 2</sup>,</span>
+            <span class="author-block">
+              <a>Tao Feng</a><sup>3</sup>,</span>
+            <span class="author-block">
+              <a>Quanyu Long</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a>Jianzhu Bao</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a>Bowen Jin</a><sup>3</sup>,</span>
+            <span class="author-block">
+              <a>Weizhi Zhang</a><sup>4</sup>,</span>
+            <span class="author-block">
+              <a>Xiao Li</a><sup>5</sup>,</span>
+            <span class="author-block">
+              <a>Jiaxuan You</a><sup>3</sup>,</span>
+            <span class="author-block">
+              <a>Chengwei Qin</a><sup>6</sup>,</span>
+            <span class="author-block">
+              <a>Wenya Wang</a><sup>1</sup>,
+            </span>
+          </div>
+
+          <div class="publication-logos" style="margin: 24px 0 14px; display: flex; justify-content: center; align-items: center; gap: 36px; flex-wrap: wrap;">
+            <img src="./static/figs/ntu.png" alt="NTU" style="height: 78px; width: 78px; object-fit: contain;"/>
+            <img src="./static/figs/thu.png" alt="Tsinghua" style="height: 78px; width: 78px; object-fit: contain;"/>
+            <img src="./static/figs/uiuc.png" alt="UIUC" style="height: 66px; width: 66px; object-fit: contain;"/>
+            <img src="./static/figs/uic.png" alt="UIC" style="height: 76px; width: 76px; object-fit: contain;"/>
+            <img src="./static/figs/sysu.png" alt="SYSU" style="height: 76px; width: 76px; object-fit: contain;"/>
+            <img src="./static/figs/hkust.png" alt="HKUST" style="height: 76px; width: 76px; object-fit: contain;"/>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>*</sup>Equal Contribution</span><br>
+            <span class="author-block"><sup>1</sup>Nanyang Technological University</span><br>
+            <span class="author-block"><sup>2</sup>Tsinghua University</span><br>
+            <span class="author-block"><sup>3</sup>University of Illinois at Urbana-Champaign</span><br>
+            <span class="author-block"><sup>4</sup>University of Illinois Chicago</span><br>
+            <span class="author-block"><sup>5</sup>Sun Yat-sen University</span><br>
+            <span class="author-block"><sup>6</sup>The Hong Kong University of Science and Technology (Guangzhou)</span><br>
+            
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/xxxx.xxxxx"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/ViktorAxelsen/BudgetMem"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <!-- <span class="link-block">
+                <a href="xxx"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-X"></i>
+                  </span>
+                  <span>Twitter</span>
+                  </a>
+              </span> -->
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Overview</h2>
+        <div class="content has-text-justified">
+          <p>
+            BudgetMem rethinks runtime agent memory from the lens of explicit performance–cost control. Rather than relying on offline, query-agnostic memory construction, BudgetMem performs on-demand memory extraction at runtime and makes the computation spent on memory both budget-aware and controllable. It organizes memory extraction as a modular pipeline, where each module provides Low/Mid/High budget tiers and can be instantiated under different tiering strategies.
+          </p>
+          <p>
+            BudgetMem further learns a lightweight budget-tier router that selects tiers module-wise based on the query and intermediate states, trained with a cost-aware reinforcement learning objective. Using BudgetMem as a unified testbed, we systematically study three complementary ways to realize tiers—implementation, reasoning, and capacity—and characterize their performance–cost behaviors across budget regimes. Experiments on LoCoMo, LongMemEval, and HotpotQA show that BudgetMem achieves strong performance in performance-first settings and yields clear performance–cost frontiers under tighter budgets, offering practical insights for building controllable proactive memory systems.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">BudgetMem Architecture</h2>
+        <div class="content has-text-justified">
+          <p>
+            BudgetMem is a runtime agent memory framework that enables explicit performance--cost control for on-demand memory extraction. Given a user query, BudgetMem first retrieves a candidate set of raw chunks from the chunked history (without offline memory construction) and then processes them through a modular memory pipeline. Each module takes the query and intermediate states as input and progressively refines query-relevant information, producing an extracted memory that conditions the final answer generation.
+          </p>
+          <p>
+            A key design in BudgetMem is that every module exposes three budget tiers (Low/Mid/High), which correspond to different cost--quality behaviors under a chosen tiering strategy (implementation, reasoning, or capacity). A shared lightweight router performs budget-tier routing module-wise as the query flows through the pipeline, selecting which tier to apply at each module based on the current context. The router is trained with reinforcement learning under a cost-aware objective, enabling controllable performance--cost behavior and providing a unified testbed to study how different tiering strategies translate compute into downstream gains.
+          </p>
+        </div>
+        <div>
+          <img src="./static/figs/model.png" alt="model figure" width="800px"/>
+          <p><b>BudgetMem architecture overview.</b></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Comparison Experiments</h2>
+        <div class="content has-text-justified">
+          <p>
+            Under the <i>performance-first</i> setting, we evaluate BudgetMem on LoCoMo, LongMemEval, and HotpotQA against a diverse set of representative memory systems. BudgetMem consistently achieves strong gains in both F1 and LLM-as-a-judge, indicating more effective long-context evidence utilization. Despite prioritizing performance, BudgetMem remains cost-efficient in practice: its on-demand design retrieves query-relevant raw chunks and spends extraction compute only when needed, avoiding unnecessary processing over the full history (with smaller cost gaps on LoCoMo where histories are shorter). Finally, BudgetMem is strong on aggregate across datasets and backbones, and the learned router transfers from LLaMA to Qwen without retraining, suggesting the routing policy generalizes beyond a single base model.
+          </p>
+        </div>
+        <img src="./static/figs/exp.png" alt="experimental results" width="800px"/>
+        <p><b>Performance-first results on LoCoMo, LongMemEval, and HotpotQA.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Exploring Trade-offs Across Tiering Strategies</h2>
+        <div class="content has-text-justified">
+          <p>
+            We systematically compare performance--cost behaviors on LoCoMo across the three tiering axes (implementation, reasoning, and capacity). By varying the cost weight <i>&lambda;</i>, BudgetMem traces smooth and controllable trade-off frontiers that consistently envelop prior baselines in both low- and high-cost regimes, achieving higher Judge at similar cost or lower cost at similar performance.
+          </p>
+          <p>
+            The three axes exhibit distinct budget coverage. <i>Implementation</i> and <i>capacity</i> tiering span a broader cost range: implementation tiering yields rapid quality gains under moderate budgets, while capacity tiering continues to improve as budget increases and achieves the best high-budget quality. In contrast, <i>reasoning</i> tiering concentrates in a narrower cost band, acting as a finer-grained quality knob with less cost spread. Overall, these results highlight complementary strengths of different tiering strategies for shaping the Pareto frontier.
+          </p>
+        </div>
+        <img src="./static/figs/tradeoff.png" alt="trade-off curves" width="800px"/>
+        <p><b>Performance--cost frontiers on LoCoMo across tiering strategies.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Ablation Study</h2>
+        <div class="content has-text-justified">
+          <p>
+            We ablate the proposed reward-scale alignment on LoCoMo under the capacity tiering strategy. Because task reward and cost reward can differ substantially in scale and variability, removing alignment destabilizes optimization and can bias learning toward the cost term, leading to an overly conservative routing behavior.
+          </p>
+          <p>
+            Empirically, without reward-scale alignment (with <i>&lambda;</i>=0.3), the router heavily favors the <span style="font-variant: small-caps;">Low</span> tier across modules, sharply reducing answer quality and yielding the lowest Judge scores. In contrast, enabling reward-scale alignment encourages a more graded use of tiers and produces a smoother, better-behaved performance--cost frontier. Overall, this ablation shows that reward-scale alignment is important for balancing learning signals and supporting meaningful performance--cost control.
+          </p>
+        </div>
+        <img src="./static/figs/ablation.png" alt="ablation results" width="500px"/>
+        <p><b>Ablation of reward-scale alignment on LoCoMo (capacity tiering).</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Discussion</h2>
+        <div class="content has-text-justified">
+          <p>
+            <b>Budget-tier selection ratio.</b> We analyze module-level routing behavior on LongMemEval (capacity tiering) by reporting the selection ratios of <span style="font-variant: small-caps;">Low</span>/<span style="font-variant: small-caps;">Mid</span>/<span style="font-variant: small-caps;">High</span> tiers under different cost weights <i>&lambda;</i>. The router exhibits a clear budget response: as cost pressure increases, it systematically shifts probability mass from higher-cost tiers to cheaper ones, providing interpretable, module-level evidence that BudgetMem allocates computation in a cost-aware manner.
+          </p>
+          <p>
+            <b>Retrieval-size sensitivity.</b> We also study how the number of retrieved raw chunks affects cost and quality on LoCoMo (evaluated under all three tiering strategies). Increasing retrieval size predictably raises cost and often improves Judge by providing more evidence, but the gain is not monotonic: retrieving too many chunks introduces redundant or weakly relevant content that increases noise and can hurt Judge, while retrieving too few chunks provides insufficient evidence. In our setting, retrieving 5 chunks offers the best balance between cost and quality.
+          </p>
+        </div>
+
+        <div class="columns is-centered">
+          <div class="column">
+            <img src="./static/figs/ratio.png" alt="budget-tier ratios" style="width:98%;"/>
+            <p><b>Budget-tier selection ratios on LongMemEval.</b></p>
+          </div>
+          <div class="column">
+            <img src="./static/figs/sen.png" alt="retrieval-size sensitivity" style="width:100%;"/>
+            <p><b>Retrieval-size sensitivity on LoCoMo.</b></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{BudgetMem,
+  author    = {Haozhen Zhang and Haodong Yue and Tao Feng and Quanyu Long and Jianzhu Bao and Bowen Jin and Weizhi Zhang and Xiao Li and Jiaxuan You and Chengwei Qin and Wenya Wang},
+  title     = {Learning Query-Aware Budget-Tier Routing for Runtime Agent Memory},
+  journal   = {arXiv preprint arXiv:xxxx.xxxxx},
+  year      = {2026},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="https://arxiv.org/abs/xxxx.xxxxx">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/ViktorAxelsen/BudgetMem" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Acknowledgement: this website is based on the template from <a
+            href="https://github.com/nerfies/nerfies.github.io">here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
