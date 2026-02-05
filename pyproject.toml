@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adaptive-memory-dialogue"
+version = "0.1.0"
+description = "Adaptive Long-term Memory Dialogue System with Dynamic Cost-Performance Balancing"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = [
+    "dialogue system",
+    "long-term memory",
+    "reinforcement learning",
+    "PPO",
+    "LLM",
+    "RAG",
+]
+dependencies = [
+    "torch>=2.0.0",
+    "numpy>=1.24.0",
+    "transformers>=4.36.0",
+    "sentence-transformers>=2.2.0",
+    "vllm>=0.4.0",
+    "openai>=1.0.0",
+    "tiktoken>=0.5.0",
+    "faiss-gpu>=1.7.0",
+    "langchain-community>=0.0.20",
+    "langchain-core>=0.1.0",
+    "nltk>=3.8.0",
+    "rouge-score>=0.1.2",
+    "regex>=2023.0.0",
+    "tqdm>=4.65.0",
+    "json-repair>=0.25.0",
+    "wandb>=0.16.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/adaptive-memory-dialogue"
+"Bug Tracker" = "https://github.com/yourusername/adaptive-memory-dialogue/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "train*", "tests*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
