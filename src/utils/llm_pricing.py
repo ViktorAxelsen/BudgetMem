@@ -13,12 +13,6 @@ LLM_TOKEN_PRICES = {
     "meta/llama-3.1-8b-instruct": (0.18, 0.18),
     "meta/llama-3.3-70b-instruct": (0.88, 0.88),
     "openai/gpt-oss-120b": (0.15, 0.60),
-    # Qwen Models
-    "qwen/qwen2.5-7b-instruct": (0.30, 0.30),
-    "qwen/qwen2-7b-instruct": (0.30, 0.30),
-    'qwen/deepseek-r1-distill-qwen-32b': (0.45, 0.45),
-    "qwen/qwen2.5-72b-instruct-turbo": (0.45, 0.45),
-    "qwen/qwen2.5-7b-instruct-turbo": (0.30, 0.30),
     "qwen/qwen3-next-80b-a3b-instruct": (0.15, 1.50),
 }
 
