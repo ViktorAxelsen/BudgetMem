@@ -58,7 +58,15 @@ BudgetMem is designed as a unified testbed to study how different tiering strate
 ## 🔗 Links
 
 - [Overview](#-overview)
-
+- [News](#-news)
+- [Get Started](#-get-started)
+- [Installation](#installation)
+- [Preparing Training Data](#-preparing-training-data)
+- [Experiments](#-experiments)
+- [Training](#️-training)
+- [Evaluation](#-evaluation)
+- [Acknowledgments](#-acknowledgments)
+- [Citation](#citation)
 
 
 
@@ -111,7 +119,7 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
 - Download LoCoMo from the official repo: [LoCoMo](https://github.com/snap-research/locomo)  
 - Put the downloaded file under:
   - `data/locomo10.json`
-- **More instructions (splits / preprocessing) will be added here.**
+<!-- - **More instructions (splits / preprocessing) will be added here.** -->
 
 #### **2) LongMemEval**
 - Download LongMemEval from the official repo: [LongMemEval](https://github.com/xiaowu0162/LongMemEval)  
@@ -122,12 +130,12 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
 
 #### **3) HotpotQA**
 - Download HotpotQA from: [HotpotQA-Modified](https://huggingface.co/datasets/BytedTsinghua-SIA/hotpotqa/tree/main) (Source: [HotpotQA](https://hotpotqa.github.io/))
-- We construct a training set by randomly sampling **7K** examples from the full training data (~32K) and place it under:
-  - `data/xxxxx.json`  
+<!-- - We construct a training set by randomly sampling **7K** examples from the full training data (~32K) and place it under:
+  - `data/xxxxx.json`   -->
 - For evaluation, we use the test file:
   - `data/eval_200.json`
 
-❗ **Extending to more datasets and runtime pipelines.** BudgetMem is designed to be easy to extend: you can plug in new datasets by defining (i) the data loader and evaluation protocol, and (ii) the module set along with their **Low/Mid/High budget-tier implementations** under a chosen tiering strategy (implementation / reasoning / capacity). See [Extending to New Datasets and Pipelines](#-extending-to-new-datasets-and-pipelines) for step-by-step instructions.
+<!-- ❗ **Extending to more datasets and runtime pipelines.** BudgetMem is designed to be easy to extend: you can plug in new datasets by defining (i) the data loader and evaluation protocol, and (ii) the module set along with their **Low/Mid/High budget-tier implementations** under a chosen tiering strategy (implementation / reasoning / capacity). See [Extending to New Datasets and Pipelines](#-extending-to-new-datasets-and-pipelines) for step-by-step instructions. -->
 
 
 
@@ -137,7 +145,7 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
 ### 🖥️ Training
 
 1. **Configure API keys and credentials**: Set up your API keys and credentials in the training scripts (`scripts/train_*.sh`) or via environment variables:
-   - **NVIDIA API keys**: Set `NVIDIA_API_KEYS` environment variable (comma-separated for multiple keys) or configure in `src/config.py`
+   - **API keys**: Configure API KEYS in `src/config.py`
    - **Hugging Face token**: Set `HF_TOKEN` or `HUGGINGFACE_TOKEN` environment variable
    - **Wandb** (optional): Set `WANDB_API_KEY` for experiment tracking, or set `WANDB_DISABLE=true` to disable
 
@@ -183,7 +191,7 @@ The test functions require the same arguments as training (tokenizers, encoders,
 
 
 
-## 🔧 Extending to New Datasets and Pipelines
+<!-- ## 🔧 Extending to New Datasets and Pipelines -->
 
 
 
