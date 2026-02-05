@@ -14,9 +14,9 @@ from tqdm import tqdm
 
 from src.utils.llm_utils import get_llm_response, get_llm_response_via_api
 from src.utils.rag_utils import get_embeddings_with_model, get_data_embeddings
-from src.utils.eval_utils import f1_score, f1_max, parse_judge_response, compute_bleu, compute_rouge_l
+from src.utils.eval_utils import f1_score, f1_max, parse_judge_response
 from src.prompts.prompt_pool import (
-    QA_PROMPT, QA_PROMPT_COT, LLM_JUDGE_GENERAL_PROMPT,HOTPOTQA_ANSWER_PROMPT
+    QA_PROMPT, LLM_JUDGE_GENERAL_PROMPT,HOTPOTQA_ANSWER_PROMPT
 )
 from src.trainer.ppo_trainer import ActorCriticNetwork
 
@@ -275,8 +275,6 @@ def test_on_test_set(
 
     all_results = []
     total_reward_f1 = 0.0
-    total_reward_bleu = 0.0
-    total_reward_rouge_l = 0.0
     total_reward_llm_judge = 0.0
     num_questions = 0
     action_counts = {
@@ -293,12 +291,6 @@ def test_on_test_set(
     category_stats_llm_judge = {
         1: {'rewards': [], 'count': 0, 'total_reward': 0.0},
     }
-    category_stats_bleu = {
-        1: {'rewards': [], 'count': 0, 'total_reward': 0.0},
-    }
-    category_stats_rouge_l = {
-        1: {'rewards': [], 'count': 0, 'total_reward': 0.0},
-    }   
 
     # Define function to process single sample
     def process_single_sample(sample_idx, data):
@@ -394,8 +386,6 @@ def test_on_test_set(
         prediction = ""
         reward_f1 = 0.0
         reward_llm_judge = 0.0
-        reward_bleu = 0.0
-        reward_rouge_l = 0.0
         if len(ret) > 0:
             idx, response, _, success = ret[0]
             if success:
@@ -411,8 +401,6 @@ def test_on_test_set(
                 # Calculate F1 score (HotpotQA all category 1, use f1_max)
                 reward_f1 = f1_score(prediction, answer)
 
-                reward_bleu = compute_bleu(prediction, answer)
-                reward_rouge_l = compute_rouge_l(prediction, answer)
                 # Calculate LLM Judge score
                 try:
                     judge_question = qa['question']
@@ -426,7 +414,7 @@ def test_on_test_set(
                     print(f"[Warning] LLM Judge failed for Q{i+1}: {e}, using 0.0")
                     reward_llm_judge = 0.0
 
-        print(f"Sample {sample_idx+1}: F1={reward_f1:.4f}, LLM-Judge={reward_llm_judge:.4f}, BLEU={reward_bleu:.4f}, ROUGE-L={reward_rouge_l:.4f}")
+        print(f"Sample {sample_idx+1}: F1={reward_f1:.4f}, LLM-Judge={reward_llm_judge:.4f}")
 
         # Record to question tracker (for statistics on consecutively failed questions)
         retrieved_memory_contents = []
@@ -480,8 +468,6 @@ def test_on_test_set(
             'prediction': prediction,
             'f1_score': reward_f1,
             'llm_judge_score': reward_llm_judge,
-            'bleu_score': reward_bleu,
-            'rouge_l_score': reward_rouge_l,
             'reward': reward_f1,  # Maintain backward compatibility, use F1 as main reward
             'actions': {
                 'module1': ['low', 'mid', 'high'][m1_action],
@@ -556,8 +542,6 @@ def test_on_test_set(
         # Accumulate statistics
         total_reward_f1 += result['f1_score']
         total_reward_llm_judge += result['llm_judge_score']
-        total_reward_bleu += result['bleu_score']
-        total_reward_rouge_l += result['rouge_l_score']
         num_questions += 1
 
         # Statistics by category
@@ -570,14 +554,6 @@ def test_on_test_set(
             category_stats_llm_judge[category]['rewards'].append(result['llm_judge_score'])
             category_stats_llm_judge[category]['count'] += 1
             category_stats_llm_judge[category]['total_reward'] += result['llm_judge_score']
-        if category in category_stats_bleu:
-            category_stats_bleu[category]['rewards'].append(result['bleu_score'])
-            category_stats_bleu[category]['count'] += 1
-            category_stats_bleu[category]['total_reward'] += result['bleu_score']
-        if category in category_stats_rouge_l:
-            category_stats_rouge_l[category]['rewards'].append(result['rouge_l_score'])
-            category_stats_rouge_l[category]['count'] += 1
-            category_stats_rouge_l[category]['total_reward'] += result['rouge_l_score']
 
         # Accumulate action counts
         actions = result['actions']
@@ -593,16 +569,12 @@ def test_on_test_set(
         print(f"{'='*60}")
         print(f"  F1: {result['f1_score']:.4f}")
         print(f"  LLM-Judge: {result['llm_judge_score']:.4f}")
-        print(f"  BLEU: {result['bleu_score']:.4f}")
-        print(f"  ROUGE-L: {result['rouge_l_score']:.4f}")
         print(f"{'='*60}")
 
         all_results.append({
             'sample_id': result['sample_id'],
             'avg_f1': result['f1_score'],
             'avg_llm_judge': result['llm_judge_score'],
-            'avg_bleu': result['bleu_score'],
-            'avg_rouge_l': result['rouge_l_score'],
             'questions': [result],
             'qa_data': result['qa_data'],
             'saved_memory_path': None  # Do not save memory file during parallel processing
@@ -612,12 +584,8 @@ def test_on_test_set(
     # Calculate overall statistics (F1 and LLM Judge)
     avg_test_reward_f1 = total_reward_f1 / max(num_questions, 1)
     avg_test_reward_llm_judge = total_reward_llm_judge / max(num_questions, 1)
-    avg_test_reward_bleu = total_reward_bleu / max(num_questions, 1)
-    avg_test_reward_rouge_l = total_reward_rouge_l / max(num_questions, 1)
     category_performance_f1 = {}
     category_performance_llm_judge = {}
-    category_performance_bleu = {}
-    category_performance_rouge_l = {}
     for cat in [1]:
         # F1 statistics (HotpotQA only has category 1, use f1_score)
         stats_f1 = category_stats_f1[cat]
@@ -654,55 +622,17 @@ def test_on_test_set(
                 'avg_reward': 0.0, 'total_reward': 0.0, 'count': 0,
                 'min_reward': 0.0, 'max_reward': 0.0, 'std_reward': 0.0
             }
-
-        # BLEU statistics
-        stats_bleu = category_stats_bleu[cat]
-        if stats_bleu['count'] > 0:
-            avg_reward = stats_bleu['total_reward'] / stats_bleu['count']
-            category_performance_bleu[cat] = {
-                'avg_reward': float(avg_reward),
-                'total_reward': float(stats_bleu['total_reward']),
-                'count': stats_bleu['count'],
-                'min_reward': float(min(stats_bleu['rewards'])) if stats_bleu['rewards'] else 0.0,
-                'max_reward': float(max(stats_bleu['rewards'])) if stats_bleu['rewards'] else 0.0,
-                'std_reward': float(np.std(stats_bleu['rewards'])) if len(stats_bleu['rewards']) > 1 else 0.0
-            }
-        else:
-            category_performance_bleu[cat] = {
-                'avg_reward': 0.0, 'total_reward': 0.0, 'count': 0,
-                'min_reward': 0.0, 'max_reward': 0.0, 'std_reward': 0.0
-            }
-
-        # ROUGE-L statistics
-        stats_rouge_l = category_stats_rouge_l[cat]
-        if stats_rouge_l['count'] > 0:
-            avg_reward = stats_rouge_l['total_reward'] / stats_rouge_l['count']
-            category_performance_rouge_l[cat] = {
-                'avg_reward': float(avg_reward),
-                'total_reward': float(stats_rouge_l['total_reward']),
-                'count': stats_rouge_l['count'],
-                'min_reward': float(min(stats_rouge_l['rewards'])) if stats_rouge_l['rewards'] else 0.0,
-                'max_reward': float(max(stats_rouge_l['rewards'])) if stats_rouge_l['rewards'] else 0.0,
-                'std_reward': float(np.std(stats_rouge_l['rewards'])) if len(stats_rouge_l['rewards']) > 1 else 0.0
-            }
-        else:
-            category_performance_rouge_l[cat] = {
-                'avg_reward': 0.0, 'total_reward': 0.0, 'count': 0,
-                'min_reward': 0.0, 'max_reward': 0.0, 'std_reward': 0.0
-            }
     print("\n" + "="*80)
     print("Test Results Summary")
     print("="*80)
     print(f"Testing Strategy:")
     print(f"  - Execute pipeline for each question")
-    print(f"  - Evaluate with BOTH F1-score, LLM Judge, BLEU and ROUGE-L")
+    print(f"  - Evaluate with BOTH F1-score and LLM Judge")
     print(f"  - Do NOT add summary memories to memory bank (consistent with training)")
     print(f"\nOverall Results:")
     print(f"  Total Questions: {num_questions}")
     print(f"  Average F1 Score: {avg_test_reward_f1:.4f}")
     print(f"  Average LLM Judge Score: {avg_test_reward_llm_judge:.4f}")
-    print(f"  Average BLEU Score: {avg_test_reward_bleu:.4f}")
-    print(f"  Average ROUGE-L Score: {avg_test_reward_rouge_l:.4f}")
     print(f"\nCategory Performance (F1 Score):")
     for cat in sorted(category_performance_f1.keys()):
         perf = category_performance_f1[cat]
@@ -723,26 +653,6 @@ def test_on_test_set(
                   f"Std: {perf['std_reward']:.4f})")
         else:
             print(f"  Category {cat}: 0 questions")
-    print(f"\nCategory Performance (BLEU):")
-    for cat in sorted(category_performance_bleu.keys()):
-        perf = category_performance_bleu[cat]
-        if perf['count'] > 0:
-            print(f"  Category {cat}: {perf['count']} questions, "
-                  f"Avg BLEU: {perf['avg_reward']:.4f} "
-                  f"(Min: {perf['min_reward']:.4f}, Max: {perf['max_reward']:.4f}, "
-                  f"Std: {perf['std_reward']:.4f})")
-        else:
-            print(f"  Category {cat}: 0 questions")
-    print(f"\nCategory Performance (ROUGE-L):")
-    for cat in sorted(category_performance_rouge_l.keys()):
-        perf = category_performance_rouge_l[cat]
-        if perf['count'] > 0:
-            print(f"  Category {cat}: {perf['count']} questions, "
-                  f"Avg ROUGE-L: {perf['avg_reward']:.4f} "
-                  f"(Min: {perf['min_reward']:.4f}, Max: {perf['max_reward']:.4f}, "
-                  f"Std: {perf['std_reward']:.4f})")
-        else:
-            print(f"  Category {cat}: 0 questions")
     print(f"\nAction Distribution:")
     total_actions = sum(action_counts.values())
     for action, count in action_counts.items():
@@ -759,9 +669,5 @@ def test_on_test_set(
         'action_counts': action_counts,
         'category_performance_f1': category_performance_f1,
         'category_performance_llm_judge': category_performance_llm_judge,
-        'category_performance_bleu': category_performance_bleu,
-        'category_performance_rouge_l': category_performance_rouge_l,
-        'avg_bleu': avg_test_reward_bleu,
-        'avg_rouge_l': avg_test_reward_rouge_l,
         'sample_results': all_results
     }

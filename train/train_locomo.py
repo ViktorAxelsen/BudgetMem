@@ -1246,7 +1246,7 @@ def train_epoch(
             query_context = '\n'.join(context_parts)
             
             input_prompt = query_context + '\n\n' + (
-                    QA_PROMPT.format(question) if not args.cot else QA_PROMPT_COT.format(question)
+                    QA_PROMPT.format(question)
                 )
             # print(f"Input prompt: {input_prompt}")
             # Get LLM answer
@@ -2109,12 +2109,8 @@ def main(args):
         llm_stats['test_phase'] = 'best_model'
         llm_stats['model_path'] = best_model_path
         llm_stats['model_save_dir'] = model_save_dir
-        llm_stats['avg_bleu'] = test_results_best['avg_bleu']
-        llm_stats['avg_rouge_l'] = test_results_best['avg_rouge_l']
         llm_stats['avg_f1'] = test_results_best['avg_f1']
         llm_stats['avg_llm_judge'] = test_results_best.get('avg_llm_judge', 0.0)
-        llm_stats['category_performance_bleu'] = test_results_best['category_performance_bleu']
-        llm_stats['category_performance_rouge_l'] = test_results_best['category_performance_rouge_l']
         llm_stats['category_performance_f1'] = test_results_best['category_performance_f1']
         llm_stats['category_performance_llm_judge'] = test_results_best['category_performance_llm_judge']
         stats_path = os.path.join(model_save_dir, 'llm_api_stats_best_model.json')
@@ -2125,8 +2121,6 @@ def main(args):
         print(f"  Total API calls: {llm_stats['total_api_calls']}")
         print(f"  Total cost: ${llm_stats['total_cost_usd']:.4f}")
         print(f"  Total tokens: {llm_stats['total_tokens']:,}")
-        print(f"  Avg BLEU: {llm_stats['avg_bleu']:.4f}")
-        print(f"  Avg ROUGE-L: {llm_stats['avg_rouge_l']:.4f}")
         wandb.log({
             'test_best/avg_f1': test_results_best['avg_f1'],
             'test_best/avg_llm_judge': test_results_best.get('avg_llm_judge', 0.0),
@@ -2167,12 +2161,8 @@ def main(args):
         llm_stats['model_save_dir'] = model_save_dir
         llm_stats['avg_f1'] = test_results_last['avg_f1']
         llm_stats['avg_llm_judge'] = test_results_last.get('avg_llm_judge', 0.0)
-        llm_stats['avg_bleu'] = test_results_last['avg_bleu']
-        llm_stats['avg_rouge_l'] = test_results_last['avg_rouge_l']
         llm_stats['category_performance_f1'] = test_results_last['category_performance_f1']
         llm_stats['category_performance_llm_judge'] = test_results_last['category_performance_llm_judge']
-        llm_stats['category_performance_bleu'] = test_results_last['category_performance_bleu']
-        llm_stats['category_performance_rouge_l'] = test_results_last['category_performance_rouge_l']
         stats_path = os.path.join(model_save_dir, 'llm_api_stats_last_epoch.json')
         print(llm_stats)
         with open(stats_path, 'w', encoding='utf-8') as f:
@@ -2199,17 +2189,11 @@ def main(args):
         last_f1 = all_test_results['last_epoch']['avg_f1']
         best_llm = all_test_results['best_model'].get('avg_llm_judge', 0.0)
         last_llm = all_test_results['last_epoch'].get('avg_llm_judge', 0.0) 
-        best_bleu = all_test_results['best_model']['avg_bleu']
-        last_bleu = all_test_results['last_epoch']['avg_bleu']
-        best_rouge_l = all_test_results['best_model']['avg_rouge_l']
-        last_rouge_l = all_test_results['last_epoch']['avg_rouge_l']
-        print(f"Best Model - F1: {best_f1:.4f}, LLM-Judge: {best_llm:.4f}, BLEU: {best_bleu:.4f}, ROUGE-L: {best_rouge_l:.4f}")
-        print(f"Last Epoch - F1: {last_f1:.4f}, LLM-Judge: {last_llm:.4f}, BLEU: {last_bleu:.4f}, ROUGE-L: {last_rouge_l:.4f}")
+        print(f"Best Model - F1: {best_f1:.4f}, LLM-Judge: {best_llm:.4f}")
+        print(f"Last Epoch - F1: {last_f1:.4f}, LLM-Judge: {last_llm:.4f}")
         diff_f1 = best_f1 - last_f1
         diff_llm = best_llm - last_llm
-        diff_bleu = best_bleu - last_bleu
-        diff_rouge_l = best_rouge_l - last_rouge_l
-        print(f"Difference - F1: {diff_f1:+.4f}, LLM-Judge: {diff_llm:+.4f}, BLEU: {diff_bleu:+.4f}, ROUGE-L: {diff_rouge_l:+.4f}")
+        print(f"Difference - F1: {diff_f1:+.4f}, LLM-Judge: {diff_llm:+.4f}")
         print("="*80)
         wandb.log({
             'test_comparison/best_f1': best_f1,
@@ -2217,13 +2201,7 @@ def main(args):
             'test_comparison/difference_f1': diff_f1,
             'test_comparison/best_llm_judge': best_llm,
             'test_comparison/last_llm_judge': last_llm,
-            'test_comparison/difference_llm_judge': diff_llm,
-            'test_comparison/best_bleu': best_bleu,
-            'test_comparison/last_bleu': last_bleu,
-            'test_comparison/difference_bleu': diff_bleu,
-            'test_comparison/best_rouge_l': best_rouge_l,
-            'test_comparison/last_rouge_l': last_rouge_l,
-            'test_comparison/difference_rouge_l': diff_rouge_l
+            'test_comparison/difference_llm_judge': diff_llm
         }, step=num_epochs + 1)
 
     wandb.finish()

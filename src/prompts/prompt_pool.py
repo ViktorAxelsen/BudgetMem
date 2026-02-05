@@ -1,6 +1,4 @@
 
-CONV_START_PROMPT = "Below is a conversation between two people: {} and {}. The conversation takes place over multiple days and the date of each conversation is wriiten at the beginning of the conversation.\n\n"
-
 
 QA_PROMPT = """
 Based on the above context, write an answer in the form of a short phrase for the following question. Answer with exact words from the context whenever possible.
@@ -22,59 +20,12 @@ Instructions:
 
 <answer>your answer here</answer>"""
 
-QA_PROMPT_COT = """
-Based on the above context, think step-by-step to identify the key information relevant to the question. 
-First, briefly analyze what the context states about the question. 
-Then, derive the most accurate short phrase that answers the question, using exact words from the context whenever possible.
-
-Question: {}
-Short answer:
-"""
-
-
-
-
-QA_PROMPT_CAT_5 = """
-Based on the above context, answer the following question.
-
-Question: {} Short answer:
-"""
-
-QA_PROMPT_CAT_5_COT = """
-Based on the above context, think step-by-step and answer the following question. 
-
-Question: {} Short answer:
-"""
-
-
-
-LONGMEMEVAL_ANSWER_PROMPT_COT = """
-I will give you several history chats between you and a user. Please answer the question based on the relevant chat history. 
-Answer the question step by step: first extract all the relevant information, and then reason over the information to get the answer.
-\n\n\nHistory Chats:\n\n{}\n\nCurrent Date: {}\nQuestion: {}\nShort Answer (step by step):
-"""
 
 
 LONGMEMEVAL_ANSWER_PROMPT = """
 I will give you several history chats between you and a user. Please answer the question based on the relevant chat history.
 \n\n\nHistory Chats:\n\n{}\n\nCurrent Date: {}\nQuestion: {}\nShort Answer:
 """
-
-LONGMEMEVAL_ANSWER_PROMPT_CON = """
-I will give you a chat history between you and a user, as well as a question from the user. Write reading notes to 
-extract all the relevant user information relevant to answering the question. If no relevant information is found, 
-just output \"empty\". \n\n\nChat History:\nSession Date: {}\nSession Content:\n{}\n\nQuestion Date: {}\nQuestion: 
-{}\nExtracted note (information relevant to answering the question):
-"""
-
-LOCOMO_ANSWER_PROMPT_CON = """
-I will give you a chat history between two people, as well as a question regarding the chat history. Write reading notes to 
-extract all the relevant information relevant to answering the question. If no relevant information is found, 
-just output \"empty\". \n\n\nChat History:\nContent:\n{}\n\n\nQuestion: 
-{}\nExtracted note (information relevant to answering the question):
-"""
-
-
 
 LLM_JUDGE_GENERAL_PROMPT = """
 You are an expert judge evaluating the quality of an answer for a QA task.
@@ -118,73 +69,6 @@ Return your output as a JSON dictionary with two fields:
 
 Be concise and objective. Do not include anything outside the JSON.
 """
-
-LLM_JUDGE_CONCISE_PROMPT = """
-You are an expert judge evaluating the quality of an answer for a QA task.
-Determine whether the model's answer correctly answers the question.
-
-[Question]
-{question}
-
-[Ground Truth Answers]
-{ground_truth}
-
-[Model Answer]
-{model_answer}
-
-Evaluation Rules:
-- Score 1.0: Correct and sufficient.
-- Score 0.5: Partially correct or incomplete.
-- Score 0.0: Incorrect, irrelevant, or contradicts the ground truth.
-
-Output ONLY the following JSON:
-{{
-  "score": <0.0 | 0.5 | 1.0>,
-  "explanation": "<brief reason>"
-}}
-"""
-
-LLM_JUDGE_SIMPLE_PROMPT = """
-Judge if the model's answer is correct.
-
-Question: {question}
-Ground truth: {ground_truth}
-Answer: {model_answer}
-
-Score:
-1.0 = correct
-0.5 = partially correct
-0.0 = wrong
-
-Respond with JSON:
-{{"score": <0|0.5|1>, "explanation": "<short reason>"}}
-"""
-
-
-
-
-INDEX_EXPANSION_PROMPT = """
-You are an expert at distilling long passages into a small set of atomic factual statements
-that are highly useful for retrieval in a QA system.
-
-Given the following passage, extract 3–7 concise factual statements that capture the key
-entities, events, and relations.
-
-Requirements:
-- Only include information explicitly stated in the passage.
-- Each statement must be self-contained and understandable in isolation.
-- Avoid vague pronouns like "it", "they" without explicit referents.
-- Do NOT add new information or speculation.
-- Do NOT include explanations of your process.
-- Output MUST be plain text lines of statements (one per line), with no JSON, no markdown,
-  no numbering, and no additional commentary.
-
-Passage:
-{passage}
-
-Compressed factual statements:
-"""
-
 
 MODULE1_FILTER_PROMPT_Direct = """
 **Role:** You are a relevance scoring system.  

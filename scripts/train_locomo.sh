@@ -1,6 +1,14 @@
 #!/bin/bash
 
 # =============================================================================
+# Change to project root directory (parent of scripts/)
+# =============================================================================
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT" || { echo "Failed to change to project root: $PROJECT_ROOT"; exit 1; }
+echo "Working directory: $(pwd)"
+
+# =============================================================================
 # Environment Variables Configuration
 # =============================================================================
 # Copy .env.example to .env and set your API keys there, or export them directly

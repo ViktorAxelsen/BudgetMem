@@ -40,7 +40,6 @@ dependencies = [
     "langchain-community>=0.0.20",
     "langchain-core>=0.1.0",
     "nltk>=3.8.0",
-    "rouge-score>=0.1.2",
     "regex>=2023.0.0",
     "tqdm>=4.65.0",
     "json-repair>=0.25.0",

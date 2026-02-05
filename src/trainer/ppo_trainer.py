@@ -39,10 +39,6 @@ class ActorCriticNetwork(nn.Module):
     - Module 5: query + filtered_memories + module5_desc → action
     - Module 4: query + aggregated_memory_emb + module4_desc → action
 
-    Key changes from 4-agent to 1-agent:
-    - Single shared encoder and action head (instead of 4 separate ones)
-    - Module description embeddings added to input to differentiate modules
-    - Projection layers to handle different input dimensions
     """
     def __init__(
         self,
@@ -64,16 +60,11 @@ class ActorCriticNetwork(nn.Module):
         self.desc_dim = desc_dim
         self.hidden_dim = hidden_dim
         self.projection_dim = projection_dim
-
-        # Shared projection layer for all 4 modules (they all have same input dimension)
-        # Input: query(768) + memory(768) = 1536 → projection_dim
         self.shared_proj = nn.Linear(query_dim + memory_dim, projection_dim)
 
-        # Module description projection layer
-        # Projects module description embedding to projection_dim
+       
         self.module_desc_proj = nn.Linear(desc_dim, projection_dim)
 
-        # Unified shared encoder (input: projected_features + projected_desc = 2 * projection_dim)
         unified_input_dim = projection_dim * 2
         self.shared_encoder = nn.Sequential(
             nn.Linear(unified_input_dim, hidden_dim),
@@ -89,19 +80,13 @@ class ActorCriticNetwork(nn.Module):
             nn.Linear(hidden_dim // 2, num_actions_per_module)
         )
 
-        # Critic: Value estimation head (based on initial state)
-        # In 1-step bandit setting, critic estimates V(s0) not V(s4)
         self.value_head = nn.Sequential(
             nn.Linear(hidden_dim, hidden_dim // 2),
             nn.ReLU(),
             nn.Linear(hidden_dim // 2, 1)
         )
 
-        # Initialize module description embeddings from text descriptions
-        # These are learnable parameters that encode the identity/role of each module
         self.module_desc_embeddings = self._init_module_desc_embeddings(desc_encoder)
-
-        # Initialize weights
         self._init_weights()
 
     def _init_module_desc_embeddings(self, desc_encoder=None):
@@ -192,19 +177,14 @@ class ActorCriticNetwork(nn.Module):
             action_logits: [batch_size, num_actions]
             encoded_features: [batch_size, hidden_dim]
         """
-        # Project features to unified dimension (all modules use shared_proj)
         projected_features = self.shared_proj(features)  # [batch_size, projection_dim]
 
-        # Project module description
         projected_desc = self.module_desc_proj(module_desc_emb)  # [batch_size, projection_dim]
 
-        # Concatenate projected features and description
         combined = torch.cat([projected_features, projected_desc], dim=-1)  # [batch_size, 2*projection_dim]
 
-        # Pass through shared encoder
         encoded = self.shared_encoder(combined)  # [batch_size, hidden_dim]
 
-        # Get action logits from shared action head
         action_logits = self.action_head(encoded)  # [batch_size, num_actions]
 
         return action_logits, encoded
@@ -228,12 +208,10 @@ class ActorCriticNetwork(nn.Module):
         batch_size = query_emb.shape[0]
         combined = torch.cat([query_emb, initial_memory_emb], dim=-1)
 
-        # Get module1 description embedding
         module_desc_emb = self.module_desc_embeddings['module1'].unsqueeze(0).expand(batch_size, -1)
 
         module1_logits, features1 = self._forward_unified(combined, module_desc_emb)
         
-        # Clear GPU cache after forward pass
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
         
@@ -254,7 +232,6 @@ class ActorCriticNetwork(nn.Module):
         batch_size = query_emb.shape[0]
         combined = torch.cat([query_emb, filtered_memory_emb], dim=-1)
 
-        # Get module2 description embedding
         module_desc_emb = self.module_desc_embeddings['module2'].unsqueeze(0).expand(batch_size, -1)
 
         module2_logits, features2 = self._forward_unified(combined, module_desc_emb)
@@ -275,7 +252,6 @@ class ActorCriticNetwork(nn.Module):
         batch_size = query_emb.shape[0]
         combined = torch.cat([query_emb, filtered_memory_emb], dim=-1)
 
-        # Get module3 description embedding
         module_desc_emb = self.module_desc_embeddings['module3'].unsqueeze(0).expand(batch_size, -1)
 
         module3_logits, features3 = self._forward_unified(combined, module_desc_emb)
@@ -296,7 +272,6 @@ class ActorCriticNetwork(nn.Module):
         batch_size = query_emb.shape[0]
         combined = torch.cat([query_emb, filtered_memory_emb], dim=-1)
 
-        # Get module5 description embedding
         module_desc_emb = self.module_desc_embeddings['module5'].unsqueeze(0).expand(batch_size, -1)
 
         module5_logits, features5 = self._forward_unified(combined, module_desc_emb)
@@ -317,7 +292,6 @@ class ActorCriticNetwork(nn.Module):
         batch_size = query_emb.shape[0]
         combined = torch.cat([query_emb, aggregated_memory_emb], dim=-1)
 
-        # Get module4 description embedding
         module_desc_emb = self.module_desc_embeddings['module4'].unsqueeze(0).expand(batch_size, -1)
 
         module4_logits, features4 = self._forward_unified(combined, module_desc_emb)
@@ -342,15 +316,12 @@ class ActorCriticNetwork(nn.Module):
         Returns:
             module1_logits, module2_logits, module3_logits, module5_logits, module4_logits, state_value
         """
-        # Sequentially compute logits for each module
         module1_logits, features1 = self.forward_module1(query_emb, initial_memory_emb)
         module2_logits, _ = self.forward_module2(query_emb, filtered_memory_emb)
         module3_logits, _ = self.forward_module3(query_emb, filtered_memory_emb)
         module5_logits, _ = self.forward_module5(query_emb, filtered_memory_emb)
         module4_logits, _ = self.forward_module4(query_emb, aggregated_memory_emb)
 
-        # Value function based on initial state (Module1 features, corresponds to V(s0))
-        # In 1-step bandit setting, this is the correct baseline
         state_value = self.value_head(features1).squeeze(-1)
 
         return module1_logits, module2_logits, module3_logits, module5_logits, module4_logits, state_value
@@ -368,7 +339,6 @@ class ActorCriticNetwork(nn.Module):
         """Step 1: Get Module1 action and initial state value"""
         logits, features = self.forward_module1(query_emb, initial_memory_emb)
         action_result = self._get_action_from_logits(logits, action, deterministic)
-        # Compute initial state value (V(s0))
         state_value = self.value_head(features).squeeze(-1)
         return (*action_result, state_value)
 
@@ -427,8 +397,6 @@ class ActorCriticNetwork(nn.Module):
         m5_dist = torch.distributions.Categorical(m5_probs)
         m4_dist = torch.distributions.Categorical(m4_probs)
 
-        # NOTE: In PPO update, MUST pass sampled actions to prevent re-sampling
-        # When actions is provided, use them directly instead of sampling
         if actions is None:
             if deterministic:
                 m1_action = torch.argmax(m1_probs, dim=-1)
@@ -443,18 +411,15 @@ class ActorCriticNetwork(nn.Module):
                 m5_action = m5_dist.sample()
                 m4_action = m4_dist.sample()
         else:
-            # CRITICAL: Use actions from rollout, do NOT re-sample
             m1_action, m2_action, m3_action, m5_action, m4_action = actions
 
-        # CRITICAL: Return average entropy instead of sum to match single-agent scale
-        # Sum of 5 entropies would make exploration term 5x larger, causing training instability
         avg_entropy = (m1_dist.entropy() + m2_dist.entropy() + m3_dist.entropy() + m5_dist.entropy() + m4_dist.entropy()) / 5.0
 
         return (
             [m1_action, m2_action, m3_action, m5_action, m4_action],
             [m1_dist.log_prob(m1_action), m2_dist.log_prob(m2_action),
              m3_dist.log_prob(m3_action), m5_dist.log_prob(m5_action), m4_dist.log_prob(m4_action)],
-            avg_entropy,  # Average entropy to match single-agent exploration scale
+            avg_entropy,  
             state_value
         )
 
@@ -474,14 +439,12 @@ class Experience:
     cost: float
     value: float
     done: bool = True
-    # Intermediate embeddings - for sequential decision PPO training
-    # CRITICAL: These must match exactly what was used during action selection
     initial_memory_emb: Optional[torch.Tensor] = None
     filtered_memory_emb: Optional[torch.Tensor] = None
     entity_emb: Optional[torch.Tensor] = None
     temporal_emb: Optional[torch.Tensor] = None
     topic_emb: Optional[torch.Tensor] = None
-    aggregated_memory_emb: Optional[torch.Tensor] = None  # CRITICAL: for Module4 action selection (aggregated from entity/temporal/topic)
+    aggregated_memory_emb: Optional[torch.Tensor] = None  
 
 
 class ExperienceBuffer:
@@ -531,9 +494,7 @@ class ExperienceBuffer:
         all_done = all(dones)
 
         if all_done:
-            # All experiences are independent episodes, use MC return
-            # return = reward (since done=True, no future rewards)
-            # advantage = reward - value
+            
             for t in range(n):
                 returns[t] = rewards[t]  # MC return: directly use reward
                 advantages[t] = rewards[t] - values[t]  # Advantage = reward - value
@@ -868,9 +829,3 @@ class PPOTrainer:
         }
 
         return metrics
-
-
-# ============================================================================
-# Legacy Support - Compatible with old 2-module API
-# ============================================================================
-

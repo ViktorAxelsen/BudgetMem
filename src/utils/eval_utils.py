@@ -6,8 +6,6 @@ from json_repair import repair_json
 import json
 from nltk.stem import PorterStemmer
 ps = PorterStemmer()
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-from rouge_score import rouge_scorer
 
 
 def normalize_answer(s):
@@ -109,38 +107,6 @@ def parse_judge_response(response):
             print("Judge score parse failed. Raw response:", response[:500] if len(response) > 500 else response)
             return 0.0
 
-
-def compute_bleu(prediction, ground_truth):
-    if not isinstance(ground_truth, list):
-        ground_truths = [ground_truth]
-    else:
-        ground_truths = ground_truth
-    pred_tokens = normalize_answer(str(prediction or "")).split()
-    if not pred_tokens:
-        return 0.0
-    smooth = SmoothingFunction().method1
-    scores = []
-    for gt in ground_truths:
-        ref_tokens = normalize_answer(str(gt or "")).split()
-        if not ref_tokens:
-            continue
-        scores.append(sentence_bleu([ref_tokens], pred_tokens, smoothing_function=smooth))
-    return max(scores) if scores else 0.0
-
-
-def compute_rouge_l(prediction, ground_truth):
-    if not isinstance(ground_truth, list):
-        ground_truths = [ground_truth]
-    else:
-        ground_truths = ground_truth
-
-    pred_text = str(prediction or "")
-    scores = []
-    for gt in ground_truths:
-        scorer = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True)
-        result = scorer.score(prediction=pred_text, target=str(gt or ""))
-        scores.append(result["rougeL"].fmeasure)
-    return max(scores) if scores else 0.0
 
 if __name__ == '__main__':
     pass

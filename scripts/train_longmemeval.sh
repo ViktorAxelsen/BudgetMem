@@ -1,6 +1,14 @@
 #!/bin/bash
 
 # =============================================================================
+# Change to project root directory (parent of scripts/)
+# =============================================================================
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT" || { echo "Failed to change to project root: $PROJECT_ROOT"; exit 1; }
+echo "Working directory: $(pwd)"
+
+# =============================================================================
 # Environment Variables Configuration
 # =============================================================================
 # Copy .env.example to .env and set your API keys there, or export them directly
@@ -28,7 +36,7 @@ COST_STRATEGY="rule_llm"  # Options: rule_llm, prompt_tier, model_tier
 REWARD_WEIGHT=1
 COST_WEIGHT=0
 tag='llm'
-DATA_FILE="../data/longmemeval/longmemeval_s.json"
+DATA_FILE="../../data/longmemeval/longmemeval_s.json"
 chunk_max_tokens=256
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)

@@ -30,8 +30,6 @@ from .eval_utils import (
     f1_score,
     f1_max,
     normalize_answer,
-    compute_bleu,
-    compute_rouge_l,
     parse_judge_response,
 )
 
@@ -62,7 +60,5 @@ __all__ = [
     "f1_score",
     "f1_max",
     "normalize_answer",
-    "compute_bleu",
-    "compute_rouge_l",
     "parse_judge_response",
 ]

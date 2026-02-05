@@ -4,7 +4,7 @@ import os
 
 def get_locomo_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-file', type=str, default="../data/locomo10.json")
+    parser.add_argument('--data-file', type=str, default="./data/locomo10.json")
     parser.add_argument('--test-data-file', type=str, default=None,
                         help="Path to test data file (default: None)")
     parser.add_argument("--model", type=str, default="Qwen/Qwen2.5-0.5B-Instruct",
@@ -23,7 +23,7 @@ def get_locomo_args():
     parser.add_argument('--module-topk', type=int, default=5,
                         help="Top-k for module input selection (default: 5)")
     parser.add_argument('--retriever', type=str, default="contriever")
-    parser.add_argument('--api-base', type=str, default="https://integrate.api.nvidia.com/v1")
+    parser.add_argument('--api-base', type=str, default="")
     parser.add_argument('--api-key', type=str, nargs='+',
                         default=os.environ.get('NVIDIA_API_KEYS', '').split(',') if os.environ.get('NVIDIA_API_KEYS') else None,
                         help="NVIDIA API keys for LLM inference. Can also be set via NVIDIA_API_KEYS env var (comma-separated)")
