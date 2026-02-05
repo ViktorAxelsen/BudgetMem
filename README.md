@@ -67,6 +67,28 @@ BudgetMem is designed as a unified testbed to study how different tiering strate
 
 ### Installation
 
+#### Option 1: Using uv (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/ViktorAxelsen/BudgetMem
+cd BudgetMem
+
+# Install uv if not already installed
+# See: https://docs.astral.sh/uv/getting-started/installation/
+
+# Create virtual environment and install dependencies
+uv sync
+
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Run scripts with uv
+uv run python train/train_locomo.py --help
+```
+
+#### Option 2: Using Conda
+
 ```bash
 # Clone the repository
 git clone https://github.com/ViktorAxelsen/BudgetMem
@@ -76,13 +98,9 @@ cd BudgetMem
 conda create -n budgetmem python=3.10
 conda activate budgetmem
 
-# specific lib
-pip install xxx
-# Others
+# Install dependencies
 pip install -r requirements.txt
 ```
-
-
 
 
 ### 📊 Preparing Training Data
@@ -116,13 +134,52 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
 ## 🧪 Experiments
 
 
-
 ### 🖥️ Training
 
+1. **Configure API keys and credentials**: Set up your API keys and credentials in the training scripts (`scripts/train_*.sh`) or via environment variables:
+   - **NVIDIA API keys**: Set `NVIDIA_API_KEYS` environment variable (comma-separated for multiple keys) or configure in `src/config.py`
+   - **Hugging Face token**: Set `HF_TOKEN` or `HUGGINGFACE_TOKEN` environment variable
+   - **Wandb** (optional): Set `WANDB_API_KEY` for experiment tracking, or set `WANDB_DISABLE=true` to disable
 
+2. **Configure GPU device** (if using GPU): Set `CUDA_VISIBLE_DEVICES` in the training scripts to specify which GPU to use:
+   ```bash
+   export CUDA_VISIBLE_DEVICES=0  # Use GPU 0
+   ```
+
+3. **Set data paths**: Update the data file paths in the training scripts:
+   - `scripts/train_locomo.sh` for LoCoMo dataset
+   - `scripts/train_longmemeval.sh` for LongMemEval dataset
+   - `scripts/train_hotpotqa.sh` for HotpotQA dataset
+
+4. **Run training**: Execute the corresponding script for your dataset:
+   ```bash
+   bash scripts/train_locomo.sh      # For LoCoMo
+   bash scripts/train_longmemeval.sh # For LongMemEval
+   bash scripts/train_hotpotqa.sh    # For HotpotQA
+   ```
+
+   You can customize training parameters (model, cost strategy, reward/cost weights, etc.) directly in the script files.
+
+5. **Training outputs**: After training completes, the script automatically evaluates both the best model and the last epoch model on the test set. Model checkpoints are saved in:
+   - Best model: `./test_model/best_model_{cost_strategy}.pt`
+   - Epoch checkpoints: `./test_model/checkpoint_epoch_{epoch}_{cost_strategy}.pt`
+   - Evaluation results and API statistics are saved in the same directory
+
+   **Note**: For `rule_llm` cost strategy, preprocessed memory pools are cached to disk for faster subsequent runs.
 
 ### 🧭 Evaluation
 
+**Automatic evaluation**: Training scripts automatically evaluate models on the test set after training completes.
+
+**Manual evaluation**: To evaluate a trained model separately, use the test utilities in the `tests/` directory. Each dataset has a corresponding test module:
+
+- **LoCoMo**: `tests/test_utils.py` → `test_on_test_set()`
+- **LongMemEval**: `tests/test_utils_longmemeval.py` → `test_on_test_set()`
+- **HotpotQA**: `tests/test_utils_hotpotqa.py` → `test_on_test_set()`
+
+The test functions require the same arguments as training (tokenizers, encoders, modules, etc.) and accept a `model_path` parameter to specify the checkpoint. You can also set the model path via `--model-path` argument or `MODEL_PATH` environment variable when calling the test functions.
+
+**Example**: To test a specific checkpoint, modify the test script to load your model and call `test_on_test_set()` with the appropriate `model_path` pointing to your checkpoint file (e.g., `./test_model/best_model_rule_llm.pt`).
 
 
 
