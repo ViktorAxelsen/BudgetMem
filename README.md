@@ -12,7 +12,7 @@
 <div align="center">
   <p>
     <a href='https://viktoraxelsen.github.io/BudgetMem/'><img src='https://img.shields.io/badge/Project-Page-00d9ff?style=for-the-badge&logo=github&logoColor=white'></a>
-    <a href='https://arxiv.org/abs/xxxx.xxxxx'><img src='https://img.shields.io/badge/arXiv-xxxx.xxxxx-ff6b6b?style=for-the-badge&logo=arxiv&logoColor=white'></a>
+    <a href='https://arxiv.org/abs/2602.06025'><img src='https://img.shields.io/badge/arXiv-2602.06025-ff6b6b?style=for-the-badge&logo=arxiv&logoColor=white'></a>
     <br>
     <a href="https://github.com/ViktorAxelsen/BudgetMem/stargazers"><img src='https://img.shields.io/github/stars/ViktorAxelsen/BudgetMem?color=f1e05a&style=for-the-badge&logo=star&logoColor=white' /></a>
     <a href="https://github.com/ViktorAxelsen/BudgetMem/forks"><img src='https://img.shields.io/github/forks/ViktorAxelsen/BudgetMem?color=2ea44f&style=for-the-badge&logo=git&logoColor=white' /></a>
@@ -212,7 +212,7 @@ We also thank **[LightMem](https://github.com/zjunlp/LightMem)** for pioneering 
 @article{BudgetMem,
   title={Learning Query-Aware Budget-Tier Routing for Runtime Agent Memory},
   author={Haozhen Zhang and Haodong Yue and Tao Feng and Quanyu Long and Jianzhu Bao and Bowen Jin and Weizhi Zhang and Xiao Li and Jiaxuan You and Chengwei Qin and Wenya Wang},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  journal={arXiv preprint arXiv:2602.06025},
   year={2026}
 }
 ```
