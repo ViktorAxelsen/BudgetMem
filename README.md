@@ -119,7 +119,14 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
 - Download LoCoMo from the official repo: [LoCoMo](https://github.com/snap-research/locomo)  
 - Put the downloaded file under:
   - `data/locomo10.json`
-<!-- - **More instructions (splits / preprocessing) will be added here.** -->
+- **Data splits**: The training script (`train/train_locomo.py`) automatically splits the data:
+  - **Training set**: Samples with indices `[0, 1, 2, 3, 4, 5, 6, 7]` (first 6 for training, last 2 for validation)
+  - **Test set**: Samples with indices `[8, 9]`
+- **Preprocessing**:
+  - QA pairs are reorganized using **stratified sampling** by category (categories 1-4) to ensure balanced training
+  - Category 5 QA pairs are filtered out during training
+  - For `rule_llm` cost strategy, memory pools are preprocessed and cached to disk (`./res_data/`) for faster subsequent runs
+  - Memory chunks are created with configurable `chunk_max_tokens` (default: 256 tokens per chunk)
 
 #### **2) LongMemEval**
 - Download LongMemEval from the official repo: [LongMemEval](https://github.com/xiaowu0162/LongMemEval)  
@@ -127,14 +134,28 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
   - `data/longmemeval_s_cleaned.json`
 - Use our split file:
   - `data/longmemeval_s_splits.json` (train/val/test)
+- **Preprocessing**:
+  - QA pairs are reorganized using **stratified sampling** by category (categories 1-6) to ensure balanced training
+  - For `rule_llm` cost strategy, memory pools are preprocessed and cached to disk (`./res_data/`) for faster subsequent runs
+  - Memory chunks are created with configurable `chunk_max_tokens` (default: 256 tokens per chunk)
 
 #### **3) HotpotQA**
 - Download HotpotQA from: [HotpotQA-Modified](https://huggingface.co/datasets/BytedTsinghua-SIA/hotpotqa/tree/main) (Source: [HotpotQA](https://hotpotqa.github.io/))
 <!-- - We construct a training set by randomly sampling **7K** examples from the full training data (~32K) and place it under:
-  - `data/xxxxx.json`   -->
+  - `data/hotpotqa_7k.json`  
 - For evaluation, we use the test file:
   - `data/eval_200.json`
-
+- **Data splits**: The training script (`train/train_hotpotqa.py`) automatically handles data splitting:
+  - **Training set**: If no validation file is provided, the last 20% of training data is used as validation set
+  - The script randomly selects samples from the full dataset for training
+  - **Test set**: Loaded from `eval_200.json`
+- **Preprocessing**:
+  - Each sample contains one question with multiple supporting documents
+  - Documents are parsed from the context string and split into memory chunks
+  - All questions are Category 1 (evaluated using F1 score)
+  - For `rule_llm` cost strategy, memory pools are preprocessed and cached to disk (`./res_data/`) for faster subsequent runs
+  - Memory chunks are created with configurable `chunk_max_tokens` (default: 256 tokens per chunk)
+  
 <!-- ❗ **Extending to more datasets and runtime pipelines.** BudgetMem is designed to be easy to extend: you can plug in new datasets by defining (i) the data loader and evaluation protocol, and (ii) the module set along with their **Low/Mid/High budget-tier implementations** under a chosen tiering strategy (implementation / reasoning / capacity). See [Extending to New Datasets and Pipelines](#-extending-to-new-datasets-and-pipelines) for step-by-step instructions. -->
 
 
