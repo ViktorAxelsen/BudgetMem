@@ -124,14 +124,14 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
   - **Test set**: Samples with indices `[8, 9]`
 - **Preprocessing**:
   - QA pairs are reorganized using **stratified sampling** by category (categories 1-4) to ensure balanced training
-  - Category 5 QA pairs are filtered out during training
+  - Category 5 QA pairs are filtered out
   - For `rule_llm` cost strategy, memory pools are preprocessed and cached to disk (`./res_data/`) for faster subsequent runs
   - Memory chunks are created with configurable `chunk_max_tokens` (default: 256 tokens per chunk)
 
 #### **2) LongMemEval**
 - Download LongMemEval from the official repo: [LongMemEval](https://github.com/xiaowu0162/LongMemEval)  
 - Put the processed file under:
-  - `data/longmemeval_s_cleaned.json`
+  - `data/longmemeval_s.json`
 - Use our split file:
   - `data/longmemeval_s_splits.json` (train/val/test)
 - **Preprocessing**:
@@ -154,7 +154,7 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
   - Documents are parsed from the context string and split into memory chunks
   - All questions are Category 1 (evaluated using F1 score)
   - For `rule_llm` cost strategy, memory pools are preprocessed and cached to disk (`./res_data/`) for faster subsequent runs
-  - Memory chunks are created with configurable `chunk_max_tokens` (default: 256 tokens per chunk)
+  - Memory chunks are created with configurable `chunk_max_tokens` (default: 1024 tokens per chunk)
   
 <!-- ❗ **Extending to more datasets and runtime pipelines.** BudgetMem is designed to be easy to extend: you can plug in new datasets by defining (i) the data loader and evaluation protocol, and (ii) the module set along with their **Low/Mid/High budget-tier implementations** under a chosen tiering strategy (implementation / reasoning / capacity). See [Extending to New Datasets and Pipelines](#-extending-to-new-datasets-and-pipelines) for step-by-step instructions. -->
 
