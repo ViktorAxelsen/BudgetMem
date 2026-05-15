@@ -50,6 +50,8 @@ BudgetMem is designed as a unified testbed to study how different tiering strate
 
 ## 📰 News
 
+- 🎉 **[2026-05]**: **BudgetMem was accepted by ICML'26!**
+
 - 🚀 **[2026-02]**: **BudgetMem** is officially released — a runtime agent memory framework that enables **explicit performance–cost control** via **module-level budget tiers** and **learned budget-tier routing**, supporting controllable on-demand memory extraction across diverse benchmarks ✨. **Stay tuned! More detailed instruction updates coming soon.**
 
 
