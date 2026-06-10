@@ -228,7 +228,7 @@ def get_llm_response_via_api(prompt,
 
     # Only count on success (completion is not None)
     if completion is not None:
-        from llm_pricing import calculate_cost
+        from src.utils.llm_pricing import calculate_cost
         cost = calculate_cost(LLM_MODEL, prompt_tokens, completion_tokens)
 
         with _llm_api_stats_lock:

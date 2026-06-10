@@ -29,6 +29,8 @@ def get_locomo_args():
                         help="NVIDIA API keys for LLM inference. Can also be set via NVIDIA_API_KEYS env var (comma-separated)")
     parser.add_argument('--parallel-questions', type=int, default=32,
                         help="Number of questions to process in parallel (1=sequential, >1=parallel)")
+    parser.add_argument('--preprocess-workers', type=int, default=min(os.cpu_count() or 4, 8),
+                        help="Worker threads for rule_llm preprocessing cache generation (default: min(CPU count, 8))")
     parser.add_argument('--num-epochs', type=int, default=7,
                         help="Number of training epochs")
     parser.add_argument('--reward-weight', type=float, default=1,

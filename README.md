@@ -190,13 +190,14 @@ BudgetMem builds training and evaluation data from the datasets below. Please do
    ```
 
    You can customize training parameters (model, cost strategy, reward/cost weights, etc.) directly in the script files.
+   For `rule_llm`, you can also reduce preprocessing concurrency on first run with `--preprocess-workers 4` if your machine is memory-constrained or you want quieter startup behavior.
 
 5. **Training outputs**: After training completes, the script automatically evaluates both the best model and the last epoch model on the test set. Model checkpoints are saved in:
    - Best model: `./test_model/best_model_{cost_strategy}.pt`
    - Epoch checkpoints: `./test_model/checkpoint_epoch_{epoch}_{cost_strategy}.pt`
    - Evaluation results and API statistics are saved in the same directory
 
-   **Note**: For `rule_llm` cost strategy, preprocessed memory pools are cached to disk for faster subsequent runs.
+   **Note**: For `rule_llm` cost strategy, preprocessed memory pools are cached under `./res_data/` for faster subsequent runs, and model outputs are saved under `./res_model/`.
 
 ### 🧭 Evaluation
 

@@ -24,7 +24,7 @@ from transformers import AutoTokenizer
 import wandb
 
 from src.utils.llm_utils import get_tokenizer, MAX_CONTEXT_LENGTH, get_llm_response, get_llm_response_via_api
-from src.utils.rag_utils import get_embeddings, get_embeddings_with_model, build_faiss_index, faiss_knn_search, init_context_model, init_query_model, init_data_embedding_model, get_data_embeddings
+from src.utils.rag_utils import get_embeddings_with_model, build_faiss_index, faiss_knn_search, init_context_model, init_query_model, init_data_embedding_model, get_data_embeddings
 from src.utils.eval_utils import *
 from src.utils.llm_pricing import align_reward_cost_scales_batch
 from src.prompts.prompt_pool import *
@@ -730,7 +730,7 @@ def preprocess_all_samples_memories(
     Module2_EntityRelation,
     Module3_TemporalRelation,
     Module5_TopicRelation=None,
-    max_workers: int = 32
+    max_workers: int = 8
 ) -> Dict[str, GlobalMemoryPool]:
     """
     Preprocess all samples' memories before training starts.
@@ -1723,7 +1723,7 @@ def main(args):
                 Module2_EntityRelation=Module2_EntityRelation,
                 Module3_TemporalRelation=Module3_TemporalRelation,
                 Module5_TopicRelation=Module5_TopicRelation,
-                max_workers=32  # Use 32 threads for parallel preprocessing
+                max_workers=args.preprocess_workers
             )
 
             # Save preprocessed memories for future use
@@ -1773,7 +1773,7 @@ def main(args):
                 Module2_EntityRelation=Module2_EntityRelation,
                 Module3_TemporalRelation=Module3_TemporalRelation,
                 Module5_TopicRelation=Module5_TopicRelation,
-                max_workers=32
+                max_workers=args.preprocess_workers
             )
             
             # Save preprocessed test memories
@@ -1957,5 +1957,9 @@ def main(args):
 
 if __name__ == '__main__':
     args = get_locomo_args()
-    print(args)
+    safe_args = dict(vars(args))
+    if safe_args.get('api_key'):
+        api_keys = safe_args['api_key']
+        safe_args['api_key'] = f"[REDACTED x{len(api_keys)}]" if isinstance(api_keys, list) else "[REDACTED]"
+    print(safe_args)
     main(args=args)

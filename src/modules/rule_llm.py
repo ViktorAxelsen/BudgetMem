@@ -2796,7 +2796,7 @@ class ModularPipelineExecutor:
         
         if self.encoder is not None:
             try:
-                from rag_utils import get_data_embeddings
+                from ..utils.rag_utils import get_data_embeddings
                 embeddings = get_data_embeddings(self.encoder, [combined_text])
                 if embeddings is not None and len(embeddings) > 0:
                     return torch.from_numpy(embeddings[0]).float().to(self.device)

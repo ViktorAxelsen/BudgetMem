@@ -25,7 +25,7 @@ from transformers import AutoTokenizer
 import wandb
 
 from src.utils.llm_utils import get_tokenizer, MAX_CONTEXT_LENGTH, get_llm_response, get_llm_response_via_api, get_llm_api_stats, reset_llm_api_stats
-from src.utils.rag_utils import get_embeddings, get_embeddings_with_model, build_faiss_index, faiss_knn_search, init_context_model, init_query_model, init_data_embedding_model, get_data_embeddings
+from src.utils.rag_utils import get_embeddings_with_model, build_faiss_index, faiss_knn_search, init_context_model, init_query_model, init_data_embedding_model, get_data_embeddings
 from src.utils.llm_pricing import (
     normalize_costs_batch,
     align_reward_cost_scales,
@@ -816,7 +816,7 @@ def preprocess_all_samples_memories_hotpotqa(
     Module2_EntityRelation,
     Module3_TemporalRelation,
     Module5_TopicRelation=None,
-    max_workers: int = 32,
+    max_workers: int = 8,
     max_tokens_per_chunk: int = 256
 ) -> Dict[str, GlobalMemoryPool]:
     from tqdm import tqdm
@@ -863,7 +863,7 @@ def save_preprocessed_memories(
     dataset_name: str,
     cost_strategy: str,
     split: str = 'train',
-    base_dir: str = "/HOME/sysu_grwang/sysu_grwang_1/HDD_POOL/lx/memory/res_code/res_data"
+    base_dir: str = "./res_data"
 ) -> str:
     """
     Save preprocessed memory pools to disk for future reuse.
@@ -914,7 +914,7 @@ def load_preprocessed_memories(
     dataset_name: str,
     cost_strategy: str,
     split: str = 'train',
-    base_dir: str = "/HOME/sysu_grwang/sysu_grwang_1/HDD_POOL/lx/memory/res_code/res_data"
+    base_dir: str = "./res_data"
 ) -> Optional[Dict[str, GlobalMemoryPool]]:
     import os
     import pickle
@@ -1815,7 +1815,7 @@ def main(args):
     dataset_name = extract_dataset_name(train_file)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_save_dir = os.path.join(
-        "/HOME/sysu_grwang/sysu_grwang_1/HDD_POOL/lx/memory/res_code/res_model",
+        "./res_model",
         dataset_name,
         args.cost_strategy,
         timestamp
@@ -1879,7 +1879,7 @@ def main(args):
                 Module2_EntityRelation=Module2_EntityRelation,
                 Module3_TemporalRelation=Module3_TemporalRelation,
                 Module5_TopicRelation=Module5_TopicRelation,
-                max_workers=32,  # Use 32 threads for parallel preprocessing
+                max_workers=args.preprocess_workers,
                 max_tokens_per_chunk=args.chunk_max_tokens  # 256 tokens per memory chunk
             )
 
@@ -1918,7 +1918,7 @@ def main(args):
                 Module2_EntityRelation=Module2_EntityRelation,
                 Module3_TemporalRelation=Module3_TemporalRelation,
                 Module5_TopicRelation=Module5_TopicRelation,
-                max_workers=32,
+                max_workers=args.preprocess_workers,
                 max_tokens_per_chunk=args.chunk_max_tokens
             )
 
@@ -2165,5 +2165,9 @@ def main(args):
 
 if __name__ == '__main__':
     args = get_locomo_args()
-    print(args)
+    safe_args = dict(vars(args))
+    if safe_args.get('api_key'):
+        api_keys = safe_args['api_key']
+        safe_args['api_key'] = f"[REDACTED x{len(api_keys)}]" if isinstance(api_keys, list) else "[REDACTED]"
+    print(safe_args)
     main(args=args)
